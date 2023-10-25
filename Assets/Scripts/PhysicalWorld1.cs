@@ -3,14 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PhysicalWorld : MonoBehaviour
+public class PhysicalWorldVec3 : MonoBehaviour
 {
-    public float[] gravity;
+    public Vector3 gravity;
     public int numSubsteps = 10;
     public bool paused = false;
 
-    public SoftBody[] softBodies;
-    private int _totFixed;
+    public SoftBodyVec3[] softBodies;
+    private float _totFixed;
 
     private bool _isPressed;
 
@@ -20,6 +20,7 @@ public class PhysicalWorld : MonoBehaviour
         {
             _isPressed = true;
         }
+        Simulate();
     }
 
     private void FixedUpdate()
@@ -27,18 +28,19 @@ public class PhysicalWorld : MonoBehaviour
         if (_isPressed)
         {
             _isPressed = false;
-            softBodies[0].translate(0f,1f,0f);
+            softBodies[0].Translate(0f,1f,0f);
         }
         Simulate();
-        print(_totFixed++);
     }
 
+    
     private void Simulate()
     {
         if (paused)
             return;
 
         var sdt = Time.fixedDeltaTime / numSubsteps;
+        print(_totFixed+=  Time.fixedDeltaTime);
 
         for (var step = 0; step < numSubsteps; step++) {
 
@@ -53,4 +55,5 @@ public class PhysicalWorld : MonoBehaviour
             
         }
     }
+    
 }

@@ -90,6 +90,15 @@ public class SoftBody : MonoBehaviour
     {
         
     }
+    
+    public void translate(float x,float y,float z)
+    {
+	    for (var i = 0; i < _numParticles; i++) {
+		    VectorHelper.VecAdd(_pos,i, new[]{x,y,z},0);
+		    VectorHelper.VecAdd(_prevPos,i, new[]{x,y,z},0);
+	    }
+    }
+
 
     private void InitPhysics()
     {
