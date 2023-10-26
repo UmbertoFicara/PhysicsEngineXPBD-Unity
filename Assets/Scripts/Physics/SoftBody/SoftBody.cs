@@ -1,5 +1,5 @@
+using System.Collections.Generic;
 using Grabber;
-using Unity.VisualScripting;
 using UnityEngine;
 using Utilities;
 using Utilities.Data_structures;
@@ -64,6 +64,10 @@ namespace Physics.SoftBody
 		private int _grabId;
 		//We grab a single particle and then we sit its inverted mass to 0. When we ungrab we have to reset its inverted mass to what itb was before 
 		private float _grabInvMass;
+
+		private List<int> _grabIds;
+		private List<float> _grabInvMasses;
+		
 		#endregion
 
 		#region MonoBehaviour
@@ -424,7 +428,6 @@ namespace Physics.SoftBody
 			for (int i = 0; i < _numParticles; i++)
 			{
 				float d2 = Vector3.SqrMagnitude(triangleIntersectionPos - _pos[i]);
-			
 				if (d2 < minD2)
 				{
 					minD2 = d2;
@@ -476,16 +479,24 @@ namespace Physics.SoftBody
 			int[] triangles = tetMesh.tetSurfaceTriIds;
 
 			//Find if the ray hit a triangle in the mesh
-			Intersections.IsRayHittingMesh(ray, vertices, triangles, out hit);
+			Intersections.IsRayHittingMesh(ray, vertices,_invMass, triangles, out hit);
 		}
 
 		public void IsSphereInsideBody(Vector3 center, float radius, out SphereHit hit)
 		{
 			//Mesh data
 			Vector3[] vertices = _pos;
-			
 			//Find if the ray hit a triangle in the mesh
 			Intersections.IsSphereInsideMesh(center, radius, vertices, out hit);
+			//Check if the vertex is static
+			if (hit !=null)
+			{
+				if (_invMass[hit.index] == 0f)
+				{
+					print("STATIC");
+					hit = null;
+				}
+			}
 		}
 
 

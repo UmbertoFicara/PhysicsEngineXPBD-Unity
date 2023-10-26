@@ -15,18 +15,22 @@ namespace Utilities
         //
         //Should return location, normal, index, distance
         //We dont care about the direction the ray hits - just if the ray is hitting a triangle from either side
-        public static bool IsRayHittingMesh(Ray ray, Vector3[] vertices, int[] triangles, out CustomHit bestHit)
+        public static bool IsRayHittingMesh(Ray ray, Vector3[] vertices,float[] invMass, int[] triangles, out CustomHit bestHit)
         {
             bestHit = null;
 
-            float smallestDistance = float.MaxValue;
+            var smallestDistance = float.MaxValue;
 
             //Loop through all triangles and find the one thats the closest
             for (int i = 0; i < triangles.Length; i += 3)
             {
-                Vector3 a = vertices[triangles[i + 0]];
-                Vector3 b = vertices[triangles[i + 1]];
-                Vector3 c = vertices[triangles[i + 2]];
+                if (invMass[triangles[i + 0]]==0 ||invMass[triangles[i + 1]]==0 ||invMass[triangles[i + 2]]==0 )
+                {
+                    continue;
+                }
+                var a = vertices[triangles[i + 0]];
+                var b = vertices[triangles[i + 1]];
+                var c = vertices[triangles[i + 2]];
 
                 if (IsRayHittingTriangle(a, b, c, ray, out CustomHit hit))
                 {
@@ -42,12 +46,7 @@ namespace Utilities
             }
 
             //If at least a triangle was hit
-            bool hitMesh = false;
-
-            if (bestHit != null)
-            {
-                hitMesh = true;
-            }
+            bool hitMesh = bestHit != null;
 
             return hitMesh;
         }

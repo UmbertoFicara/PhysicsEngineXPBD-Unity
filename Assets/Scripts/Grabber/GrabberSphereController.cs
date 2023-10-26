@@ -29,12 +29,9 @@ namespace Grabber
                 movY += 1;
             if(movYneg)
                 movY -= 1;
-            
-
-
             Vector3 mov = new Vector3(movX, movY, movZ) * (velocityGrabber * Time.deltaTime);
-
             transform.Translate(mov);
+            
             _grabber.MoveGrab(transform.position);
         }
         

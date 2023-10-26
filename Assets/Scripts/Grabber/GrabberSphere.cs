@@ -7,7 +7,7 @@ namespace Grabber
     public class GrabberSphere : IGrabber
     {
         private Vector3 _centerPos;
-        private float _radius;
+        private readonly float _radius;
         //The mesh we grab
         private IGrabbable _grabbedBody;
         //To give the mesh a velocity when we release it
@@ -72,14 +72,10 @@ namespace Grabber
             }
 
             //Add a velocity to the ball
-            Vector3 grabPos = position;
+            var vel = (position - _lastGrabPos).magnitude / Time.deltaTime;
+            var dir = (position - _lastGrabPos).normalized;
 
-            float vel = (grabPos - _lastGrabPos).magnitude / Time.deltaTime;
-        
-            Vector3 dir = (grabPos - _lastGrabPos).normalized;
-
-            _grabbedBody.EndGrab(grabPos, dir * vel);
-
+            _grabbedBody.EndGrab(position, dir * vel);
             _grabbedBody = null;
         }
     }
