@@ -19,6 +19,7 @@ namespace Physics.SoftBody
 		public float meshScale = 1f;
 		[Range(0f,500f)]public float edgeCompliance= 100.0f;
 		[Range(0f,500f)]public float volCompliance = 0.0f;
+		public bool isBaseStatic;
 
 		//------------------------------
 		//The Unity mesh to display the soft body mesh
@@ -61,9 +62,9 @@ namespace Physics.SoftBody
 		};
 		//Grabbing with mouse to move mesh around
 		//The id of the particle we grabed with mouse
-		private int _grabId;
+		//private int _grabId;
 		//We grab a single particle and then we sit its inverted mass to 0. When we ungrab we have to reset its inverted mass to what itb was before 
-		private float _grabInvMass;
+		//private float _grabInvMass;
 
 		private List<int> _grabIds;
 		private List<float> _grabInvMasses;
@@ -120,10 +121,10 @@ namespace Physics.SoftBody
 				new[] { 0, 1, 2 }
 			};
 		
-			_grabId = -1; 
-			_grabInvMass = 0.0f;
-		
-		
+			//_grabId = -1; 
+			//_grabInvMass = 0.0f;
+			 _grabIds=new List<int>();
+			 _grabInvMasses=new List<float>();
 		}
 		private void OnDestroy()
 		{
@@ -171,9 +172,11 @@ namespace Physics.SoftBody
 				var id1 = _edgeIds[2 * i + 1];
 				_restEdgeLengths[i] = Vector3.Distance(_pos[id0], _pos[id1]);
 			}
-			
-			SetBaseStatic();
-			
+
+			if (isBaseStatic)
+			{
+				SetBaseStatic();
+			}
 		}
 
 		private void SetBaseStatic()
@@ -417,13 +420,10 @@ namespace Physics.SoftBody
 		
 		#region Grabber
 		//Input pos is the pos in a triangle we get when doing ray-triangle intersection
-		public void StartGrab(Vector3 triangleIntersectionPos)
+		public int StartGrab(Vector3 triangleIntersectionPos)
 		{
 			//Find the closest vertex to the pos on a triangle in the mesh
 			float minD2 = float.MaxValue;
-		
-			_grabId = -1;
-
 			int index=-1;
 			for (int i = 0; i < _numParticles; i++)
 			{
@@ -434,42 +434,30 @@ namespace Physics.SoftBody
 					index = i;
 				}
 			}
-			
-
-			_grabId = index;
-
-			//We have found a vertex
-			if (_grabId >= 0)
-			{
-				
-				//Save the current innverted mass
-				_grabInvMass = _invMass[_grabId];
-			
-				//Set the inverted mass to 0 to mark it as fixed
-				_invMass[_grabId] = 0f;
-
-				//Set the position of the vertex to the position where the ray hit the triangle
-				_pos[_grabId] = triangleIntersectionPos;
-			}
+			if(index==-1)
+				return -1;
+			_grabIds.Add(index);
+			//Save the current innverted mass
+			_grabInvMasses.Add(_invMass[index]);
+			//Set the inverted mass to 0 to mark it as fixed
+			_invMass[index] = 0f;
+			//Set the position of the vertex to the position where the ray hit the triangle
+			_pos[index] = triangleIntersectionPos;
+			return _grabIds.Count-1;
 		}
-		public void MoveGrabbed(Vector3 newPos)
+		public void MoveGrabbed(Vector3 newPos,int index)
 		{
-			if (_grabId >= 0)
-			{
-				_pos[_grabId] = newPos;
-			}
+			_pos[_grabIds[index]] = newPos;
 		}
-		public void EndGrab(Vector3 grabPos, Vector3 newParticleVel)
+		public void EndGrab(Vector3 grabPos, Vector3 newParticleVel,int index)
 		{
-			if (_grabId >= 0)
-			{
-				//Set the mass to whatever mass it was before we grabbed it
-				_invMass[_grabId] = _grabInvMass;
+			//Set the mass to whatever mass it was before we grabbed it
+			_invMass[_grabIds[index]] = _grabInvMasses[index];
 
-				_vel[_grabId] = newParticleVel;
-			}
+			_vel[_grabIds[index]] = newParticleVel;
 
-			_grabId = -1;
+			_grabIds.Remove(index);
+			_grabInvMasses.Remove(index);
 		}
 		public void IsRayHittingBody(Ray ray, out CustomHit hit)
 		{
@@ -500,9 +488,9 @@ namespace Physics.SoftBody
 		}
 
 
-		public Vector3 GetGrabbedPos()
+		public Vector3 GetGrabbedPos(int index)
 		{
-			return _pos[_grabId];
+			return _pos[_grabIds[index]];
 		}
 		#endregion
 

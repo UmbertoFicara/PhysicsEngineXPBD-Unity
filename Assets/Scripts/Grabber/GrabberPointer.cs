@@ -10,6 +10,7 @@ namespace Grabber
         private readonly Camera _mainCamera;
         //The mesh we grab
         private IGrabbable _grabbedBody;
+        private int _indexGrabbedBody;
         //Mesh grabbing data
         //When we have grabbed a mesh by using ray-triangle itersection we identify the closest vertex. The distance from camera to this vertex is constant so we can move it around without doing another ray-triangle itersection  
         private float _distanceToGrabPos;
@@ -67,7 +68,7 @@ namespace Grabber
                 _grabbedBody = closestBody;
         
                 //StartGrab is finding the closest vertex and setting it to the position where the ray hit the triangle
-                closestBody.StartGrab(closestHit.location);
+                _indexGrabbedBody = closestBody.StartGrab(closestHit.location);
 
                 _lastGrabPos = closestHit.location;
 
@@ -78,7 +79,7 @@ namespace Grabber
     
         public void MoveGrab(Vector3 mousePosition)
         {
-            if (_grabbedBody == null)
+            if (_grabbedBody == null || _indexGrabbedBody == -1)
             {
                 return;
             }
@@ -89,15 +90,15 @@ namespace Grabber
             Vector3 vertexPos = ray.origin + ray.direction * _distanceToGrabPos;
 
             //Cache the old pos before we assign it
-            _lastGrabPos = _grabbedBody.GetGrabbedPos();
+            _lastGrabPos = _grabbedBody.GetGrabbedPos(_indexGrabbedBody);
 
             //Moved the vertex to the new pos
-            _grabbedBody.MoveGrabbed(vertexPos);
+            _grabbedBody.MoveGrabbed(vertexPos,_indexGrabbedBody);
         }
     
         public void EndGrab(Vector3 mousePosition)
         {
-            if (_grabbedBody == null)
+            if (_grabbedBody == null || _indexGrabbedBody == -1)
             {
                 return;
             }
@@ -113,8 +114,9 @@ namespace Grabber
         
             Vector3 dir = (grabPos - _lastGrabPos).normalized;
 
-            _grabbedBody.EndGrab(grabPos, dir * vel);
+            _grabbedBody.EndGrab(grabPos, dir * vel,_indexGrabbedBody);
 
+            _indexGrabbedBody = -1;
             _grabbedBody = null;
         }
     }

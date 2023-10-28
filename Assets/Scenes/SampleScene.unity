@@ -599,6 +599,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2530494586524191216, guid: fac81c21e34a88a4196eb0b458fefbd1, type: 3}
+      propertyPath: isBaseStatic
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2530494586524191216, guid: fac81c21e34a88a4196eb0b458fefbd1, type: 3}
       propertyPath: edgeCompliance
       value: 100
       objectReference: {fileID: 0}
