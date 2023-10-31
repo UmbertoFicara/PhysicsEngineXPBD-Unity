@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 505036721787059638}
   - component: {fileID: 5804281629991715518}
   m_Layer: 0
-  m_Name: GrabbingPoint
+  m_Name: GrabbingPointL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 6669309436642916716}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.39, y: 0.49, z: 0}
+  m_LocalPosition: {x: -0.39, y: 0.49, z: -2.47}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 432995caf5c93a549873abe55aa111e9, type: 2}
+  - {fileID: 2100000, guid: 386b77ee253bd264a9b3977fd5985fc0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -99,3 +99,4 @@ MonoBehaviour:
   physicalWorld: {fileID: 0}
   colliderRadius: 0.1
   velocityGrabber: 5
+  isRightGrabber: 0

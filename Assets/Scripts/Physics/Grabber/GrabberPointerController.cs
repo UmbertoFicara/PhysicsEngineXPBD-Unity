@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Physics;
+using Physics.Grabber.Interfaces;
 using UnityEngine;
 
 namespace Grabber

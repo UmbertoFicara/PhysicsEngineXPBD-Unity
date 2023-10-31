@@ -17,7 +17,6 @@ namespace Physics
 
         private bool _isPressedJump;
         private bool _isPressedSqueeze;
-        private bool _isSqueezed;
         private void Start()
         {
             _softBodies = FindObjectsOfType<SoftBody.SoftBody>();
@@ -25,53 +24,13 @@ namespace Physics
         }
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                _isPressedJump = true;
-            }
             if (Input.GetKeyDown(KeyCode.P))
             {
                 paused = !paused;
-                _isSqueezed = false;
             }
-            //Make the mesh flat when holding right mouse 
-            if (Input.GetKeyDown(KeyCode.L))
-            {
-                if (_isSqueezed)
-                {
-                    _isSqueezed = false;
-                    paused = false;
-                }
-                else
-                {
-                    _isPressedSqueeze = true;
-                    paused = true;
-                }
-     
-            }
-            
         }
         private void FixedUpdate()
         {
-            if (_isPressedJump)
-            {
-                _isPressedJump = false;
-                foreach (var softBody in _softBodies)
-                {
-                    softBody.Translate(new Vector3(0,5,0));
-                }
-            }
-
-            if (_isPressedSqueeze)
-            {
-                _isPressedSqueeze = false;
-                foreach (var soft in _softBodies)
-                {
-                    soft.Squeeze();
-                }
-
-                _isSqueezed = true;
-            }
             Simulate();
         }
 

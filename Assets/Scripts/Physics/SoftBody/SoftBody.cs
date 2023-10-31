@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Grabber;
+using Physics.Grabber.Interfaces;
 using UnityEngine;
 using Utilities;
 using Utilities.Data_structures;
@@ -66,8 +67,7 @@ namespace Physics.SoftBody
 		//We grab a single particle and then we sit its inverted mass to 0. When we ungrab we have to reset its inverted mass to what itb was before 
 		//private float _grabInvMass;
 
-		private List<int> _grabIds;
-		private List<float> _grabInvMasses;
+		private List<GrabbedVertex> _grabbedVertices;
 		
 		#endregion
 
@@ -123,8 +123,7 @@ namespace Physics.SoftBody
 		
 			//_grabId = -1; 
 			//_grabInvMass = 0.0f;
-			 _grabIds=new List<int>();
-			 _grabInvMasses=new List<float>();
+			_grabbedVertices = new List<GrabbedVertex>();
 		}
 		private void OnDestroy()
 		{
@@ -179,24 +178,33 @@ namespace Physics.SoftBody
 			}
 		}
 
+		private void SetVertexStatic(int index)
+		{
+			_invMass[index] = 0f;
+		}
+		private bool IsVertexStatic(int index)
+		{
+			return _invMass[index] == 0f;
+		}
 		private void SetBaseStatic()
 		{
 			for (int i = 0; i < _numParticles; i++)
 			{
 				if (_pos[i].y<0.1f)
 				{
-					_invMass[i] = 0f;
+					SetVertexStatic(i);
 				}
 				
 			}
 		}
+		
 		//Move the particles and handle environment collision
 		public void PreSolve(float dt, Vector3 gravity,Vector3 worldSize,Vector3 worldCenter )
 		{
 			//For each particle
 			for (var i = 0; i < _numParticles; i++) {
 				//This means the particle is fixed, so don't simulate it
-				if (_invMass[i] == 0.0)
+				if (IsVertexStatic(i))
 					continue;
 				//Update vel
 				_vel[i] += gravity * dt;
@@ -205,14 +213,7 @@ namespace Physics.SoftBody
 				//Update pos
 				_pos[i] += _vel[i] * dt;
 				EnvironmentCollision(i,worldSize,worldCenter);
-				/*
-				var y = _pos[i].y;
-				if (y < 0.0) {
-					_pos[i]=_prevPos[i];
-					_pos[i].y = 0.0f;
-				}*/
 			}
-	    
 		}
 		//Collision with invisible walls and floor
 		private void EnvironmentCollision(int i,Vector3 worldSize,Vector3 worldCenter)
@@ -282,7 +283,7 @@ namespace Physics.SoftBody
 			var oneOverDt = 1f / dt;
 			//For each particle
 			for (var i = 0; i < _numParticles; i++) {
-				if (_invMass[i] == 0.0)
+				if (IsVertexStatic(i))
 					continue;
 				_vel[i] = (_pos[i] - _prevPos[i]) * oneOverDt;
 			}
@@ -436,30 +437,40 @@ namespace Physics.SoftBody
 			}
 			if(index==-1)
 				return -1;
-			_grabIds.Add(index);
-			//Save the current innverted mass
-			_grabInvMasses.Add(_invMass[index]);
+			_grabbedVertices.Add(new GrabbedVertex(index,_invMass[index]));
 			//Set the inverted mass to 0 to mark it as fixed
 			_invMass[index] = 0f;
 			//Set the position of the vertex to the position where the ray hit the triangle
 			_pos[index] = triangleIntersectionPos;
-			return _grabIds.Count-1;
+			return index;
 		}
+
+		public void StartGrabVertex(Vector3 grabPos, int vertexIndex)
+		{
+			if (_grabbedVertices.Exists(item => item.index == vertexIndex)) return;
+			_grabbedVertices.Add(new GrabbedVertex(vertexIndex,_invMass[vertexIndex]));
+			_invMass[vertexIndex] = 0f;
+			_pos[vertexIndex] = grabPos;
+		}
+
 		public void MoveGrabbed(Vector3 newPos,int index)
 		{
-			_pos[_grabIds[index]] = newPos;
+			if (!_grabbedVertices.Exists(item => item.index ==index)) return;
+			_pos[index] = newPos;
 		}
 		public void EndGrab(Vector3 grabPos, Vector3 newParticleVel,int index)
 		{
-			//Set the mass to whatever mass it was before we grabbed it
-			_invMass[_grabIds[index]] = _grabInvMasses[index];
+			if (!_grabbedVertices.Exists(item => item.index == index)) return;
+			
+			GrabbedVertex foundItem = _grabbedVertices.Find(item => item.index == index);
+				//Set the mass to whatever mass it was before we grabbed it
+			_invMass[index] = foundItem.invMass;
+			_vel[index] = newParticleVel;
+			_grabbedVertices.Remove(foundItem);
 
-			_vel[_grabIds[index]] = newParticleVel;
 
-			_grabIds.Remove(index);
-			_grabInvMasses.Remove(index);
 		}
-		public void IsRayHittingBody(Ray ray, out CustomHit hit)
+		public void IsRayHittingBody(Ray ray, out PointerHit hit)
 		{
 			//Mesh data
 			Vector3[] vertices = _pos;
@@ -470,32 +481,33 @@ namespace Physics.SoftBody
 			Intersections.IsRayHittingMesh(ray, vertices,_invMass, triangles, out hit);
 		}
 
-		public void IsSphereInsideBody(Vector3 center, float radius, out SphereHit hit)
+		public bool IsSphereInsideBody(Vector3 center, float radius, out SphereHit bestVertex)
 		{
-			//Mesh data
-			Vector3[] vertices = _pos;
-			//Find if the ray hit a triangle in the mesh
-			Intersections.IsSphereInsideMesh(center, radius, vertices, out hit);
-			//Check if the vertex is static
-			if (hit !=null)
+			var vertices = _pos;
+			bestVertex = null;
+			var smallestDistance = float.MaxValue;
+			for (var i = 0; i < vertices.Length; i++)
 			{
-				if (_invMass[hit.index] == 0f)
-				{
-					print("STATIC");
-					hit = null;
-				}
+				var vertex = vertices[i];
+				if (!Intersections.IsVertexIntoSphere(vertex, center, radius, out var distance) || IsVertexStatic(i)) continue;
+				if (!(distance < smallestDistance)) continue;
+				smallestDistance =distance;
+				bestVertex = new SphereHit(distance, vertex, i);
 			}
+			return bestVertex != null;
 		}
 
 
 		public Vector3 GetGrabbedPos(int index)
 		{
-			return _pos[_grabIds[index]];
+			return _pos[index];
 		}
 		#endregion
 
 	}
 }
+
+
 
 
 

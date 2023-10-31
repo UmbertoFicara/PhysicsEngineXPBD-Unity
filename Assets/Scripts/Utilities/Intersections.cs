@@ -15,7 +15,7 @@ namespace Utilities
         //
         //Should return location, normal, index, distance
         //We dont care about the direction the ray hits - just if the ray is hitting a triangle from either side
-        public static bool IsRayHittingMesh(Ray ray, Vector3[] vertices,float[] invMass, int[] triangles, out CustomHit bestHit)
+        public static bool IsRayHittingMesh(Ray ray, Vector3[] vertices,float[] invMass, int[] triangles, out PointerHit bestHit)
         {
             bestHit = null;
 
@@ -32,7 +32,7 @@ namespace Utilities
                 var b = vertices[triangles[i + 1]];
                 var c = vertices[triangles[i + 2]];
 
-                if (IsRayHittingTriangle(a, b, c, ray, out CustomHit hit))
+                if (IsRayHittingTriangle(a, b, c, ray, out PointerHit hit))
                 {
                     if (hit.distance < smallestDistance)
                     {
@@ -87,7 +87,7 @@ namespace Utilities
         //
         //First do ray-plane itersection and then check if the itersection point is within the triangle
         //https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution
-        public static bool IsRayHittingTriangle(Vector3 v0, Vector3 v1, Vector3 v2, Ray ray, out CustomHit hit)
+        public static bool IsRayHittingTriangle(Vector3 v0, Vector3 v1, Vector3 v2, Ray ray, out PointerHit hit)
         {
             hit = null;
 
@@ -158,38 +158,15 @@ namespace Utilities
             //This ray hits the triangle
 
             //Calculate the custom data we need
-            hit = new CustomHit(t, P, planeNormal.normalized);
+            hit = new PointerHit(t, P, planeNormal.normalized);
 
             return true;
         }
         
-        public static bool IsVertInSphere(Vector3 vert, Vector3 centerSphere, float radiusSphere)
+        public static bool IsVertexIntoSphere(Vector3 vert, Vector3 centerSphere, float radiusSphere,out float distanceFromCenter)
         {
-            var distance = Vector3.Distance(centerSphere, vert);
-            return distance <= radiusSphere;
+            distanceFromCenter = Vector3.Distance(centerSphere, vert);
+            return distanceFromCenter <= radiusSphere;
         }
-        public static bool IsSphereInsideMesh(Vector3 centerSphere, float radiusSphere, Vector3[] vertices, out SphereHit bestHit)
-        {
-            bestHit = null;
-
-            float smallestDistance = float.MaxValue;
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                var vertex = vertices[i];
-                if (IsVertInSphere(vertex, centerSphere, radiusSphere))
-                {
-                    if (Vector3.Distance(centerSphere, vertex) < smallestDistance)
-                    {
-                        smallestDistance =Vector3.Distance(centerSphere, vertex);
-                        bestHit = new SphereHit(Vector3.Distance(centerSphere, vertex), vertex, i);
-                    }
-                }
-            }
-            bool hitMesh = bestHit != null;
-
-            return hitMesh;
-        }
-        
-        
     }
 }

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using Physics.Grabber.Interfaces;
 using UnityEngine;
+using Utilities.Data_structures;
 
 //General class to grab objects with mouse and throw them around
 namespace Grabber
@@ -36,11 +38,11 @@ namespace Grabber
 
             IGrabbable closestBody = null;
 
-            CustomHit closestHit = default;
+            PointerHit closestHit = default;
 
             foreach (IGrabbable body in bodies)
             {
-                body.IsRayHittingBody(ray, out CustomHit hit);
+                body.IsRayHittingBody(ray, out PointerHit hit);
 
                 if (hit != null)
                 {
@@ -119,5 +121,7 @@ namespace Grabber
             _indexGrabbedBody = -1;
             _grabbedBody = null;
         }
+
+ 
     }
 }

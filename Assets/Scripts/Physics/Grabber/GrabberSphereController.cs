@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using Physics;
+using Grabber;
+using Physics.Grabber.Interfaces;
 using UnityEngine;
 
-namespace Grabber
+namespace Physics.Grabber
 {
     public class GrabberSphereController : MonoBehaviour
     {
@@ -11,7 +12,7 @@ namespace Grabber
         public float colliderRadius;
         private GrabberSphere _grabber;
         public float velocityGrabber=50f;
-
+        public bool isRightGrabber;
         // Start is called before the first frame update
         private void Start()
         {
@@ -20,10 +21,22 @@ namespace Grabber
 
         private void Update()
         {
-            float movX = Input.GetAxis("Horizontal");
-            float movZ = Input.GetAxis("Vertical");
-            bool movYpos = Input.GetKey(KeyCode.E);
-            bool movYneg = Input.GetKey(KeyCode.Q);
+            bool movXneg =isRightGrabber?Input.GetKey(KeyCode.J) :Input.GetKey(KeyCode.A);
+            bool movXpos =isRightGrabber?Input.GetKey(KeyCode.L): Input.GetKey(KeyCode.D);
+            float movX = 0;
+            if (movXpos)
+                movX += 1;
+            if(movXneg)
+                movX -= 1;
+            bool movZneg =isRightGrabber?Input.GetKey(KeyCode.K) :Input.GetKey(KeyCode.S);
+            bool movZpos =isRightGrabber?Input.GetKey(KeyCode.I): Input.GetKey(KeyCode.W);
+            float movZ = 0;
+            if (movZpos)
+                movZ += 1;
+            if(movZneg)
+                movZ -= 1;
+            bool movYneg =isRightGrabber?Input.GetKey(KeyCode.U) :Input.GetKey(KeyCode.Q);
+            bool movYpos =isRightGrabber?Input.GetKey(KeyCode.O): Input.GetKey(KeyCode.E);
             float movY = 0;
             if (movYpos)
                 movY += 1;
@@ -37,13 +50,13 @@ namespace Grabber
         
         private void LateUpdate()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (isRightGrabber? Input.GetKeyDown(KeyCode.RightShift): Input.GetKeyDown(KeyCode.LeftShift))
             {
                 var temp = new List<IGrabbable>(physicalWorld.GetSoftBodies().ToList());
                 _grabber.StartGrab(temp);
             }
 
-            if (Input.GetKeyUp(KeyCode.Space))
+            if (isRightGrabber? Input.GetKeyUp(KeyCode.RightShift): Input.GetKeyUp(KeyCode.LeftShift))
             {
                 _grabber.EndGrab(transform.position);
             }
