@@ -1,7 +1,7 @@
 using UnityEngine;
-using Utilities.Data_structures;
+using XPBD_Engine.Scripts.Utilities.Data_structures;
 
-namespace Utilities
+namespace XPBD_Engine.Scripts.Utilities
 {
     public static class Intersections
     {

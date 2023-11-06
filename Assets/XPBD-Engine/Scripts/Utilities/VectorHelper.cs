@@ -1,6 +1,6 @@
-using UnityEditor.PackageManager;
 using UnityEngine;
-namespace DefaultNamespace
+
+namespace XPBD_Engine.Scripts.Utilities
 {
     public static class VectorHelper
     {

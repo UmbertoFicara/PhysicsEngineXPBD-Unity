@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
-using DefaultNamespace;
-using Grabber;
-using Physics.Grabber.Interfaces;
 using UnityEngine;
-using UnityEngine.Serialization;
-using Utilities;
-using Utilities.Data_structures;
+using XPBD_Engine.Scripts.Physics.Grabber.Interfaces;
+using XPBD_Engine.Scripts.Utilities;
+using XPBD_Engine.Scripts.Utilities.Data_structures;
 
-namespace Physics.SoftBody
+namespace XPBD_Engine.Scripts.Physics.SoftBody
 {
 	//Same as SoftBodySimulation but is using Vector3 instead of arrays where an index in the array is x, y, or z 
 	//This makes the code simpler to read buy maye a little slower according to the guy in the video, but I don't notice much difference...

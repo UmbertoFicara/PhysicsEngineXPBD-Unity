@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using Physics.Grabber.Interfaces;
 using UnityEngine;
 
-namespace Grabber
+namespace XPBD_Engine.Scripts.Physics.Grabber.Interfaces
 {
     public interface IGrabber
     {

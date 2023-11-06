@@ -1,11 +1,9 @@
 using System;
-using DefaultNamespace;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
-using Utilities;
 
-namespace MullerTutorial
+namespace XPBD_Engine.Scripts.Utilities
 {
 	[RequireComponent(typeof(MeshFilter))]
 	public class SoftBodyTutorial : MonoBehaviour

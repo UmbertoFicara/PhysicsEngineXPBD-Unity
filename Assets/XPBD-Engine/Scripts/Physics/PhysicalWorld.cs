@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
-using Physics.RigidBody;
-using Physics.SoftBody;
 using UnityEngine;
+using XPBD_Engine.Scripts.Physics.RigidBody;
+using XPBD_Engine.Scripts.Physics.SoftBody;
 
-namespace Physics
+namespace XPBD_Engine.Scripts.Physics
 {
     public class PhysicalWorld : MonoBehaviour
     {
@@ -14,16 +13,16 @@ namespace Physics
         public int numSubsteps = 10;
         public bool paused;
 
-        private SoftBody.SoftBodyClassic[] _classicSoftBodies;
-        private SoftBody.SoftBodyAdvanced[] _advancedSoftBodies;
+        private global::XPBD_Engine.Scripts.Physics.SoftBody.SoftBodyClassic[] _classicSoftBodies;
+        private global::XPBD_Engine.Scripts.Physics.SoftBody.SoftBodyAdvanced[] _advancedSoftBodies;
         private Ball[] _balls;
 
         private bool _isPressedJump;
         private bool _isPressedSqueeze;
         private void Start()
         {
-            _classicSoftBodies = FindObjectsOfType<SoftBody.SoftBodyClassic>();
-            _advancedSoftBodies = FindObjectsOfType<SoftBody.SoftBodyAdvanced>();
+            _classicSoftBodies = FindObjectsOfType<global::XPBD_Engine.Scripts.Physics.SoftBody.SoftBodyClassic>();
+            _advancedSoftBodies = FindObjectsOfType<global::XPBD_Engine.Scripts.Physics.SoftBody.SoftBodyAdvanced>();
             _balls = FindObjectsOfType<Ball>();
         }
         private void Update()

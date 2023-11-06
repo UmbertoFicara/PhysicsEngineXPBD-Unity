@@ -1,4 +1,4 @@
-namespace Utilities.Data_structures
+namespace XPBD_Engine.Scripts.Utilities.Data_structures
 {
     public struct GrabbedVertex
     {

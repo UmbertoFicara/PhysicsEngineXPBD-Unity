@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Utilities
+namespace XPBD_Engine.Scripts.Utilities
 {
     public class Hash
     {

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Physics.Grabber.Interfaces;
 using UnityEngine;
-using Utilities.Data_structures;
+using XPBD_Engine.Scripts.Physics.Grabber.Interfaces;
+using XPBD_Engine.Scripts.Utilities.Data_structures;
 
 //General class to grab objects with mouse and throw them around
-namespace Grabber
+namespace XPBD_Engine.Scripts.Physics.Grabber
 {
     public class GrabberPointer: IGrabber
     {

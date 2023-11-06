@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Utilities.Data_structures
+namespace XPBD_Engine.Scripts.Utilities.Data_structures
 {
     public class SphereHit
     {

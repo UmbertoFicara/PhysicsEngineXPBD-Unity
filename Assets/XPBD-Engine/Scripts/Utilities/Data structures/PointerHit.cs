@@ -1,7 +1,7 @@
 using UnityEngine;
 
 //Should be class so it can be null
-namespace Utilities.Data_structures
+namespace XPBD_Engine.Scripts.Utilities.Data_structures
 {
     public class PointerHit
     {

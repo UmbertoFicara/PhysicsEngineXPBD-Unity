@@ -1,6 +1,6 @@
-using Physics.Grabber.Interfaces;
+using XPBD_Engine.Scripts.Physics.Grabber.Interfaces;
 
-namespace Utilities.Data_structures
+namespace XPBD_Engine.Scripts.Utilities.Data_structures
 {
     //This class helps to record which body and vertex of that body it is grabbing
     public struct GrabbedBodyVertex

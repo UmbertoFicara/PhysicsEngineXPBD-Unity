@@ -1,7 +1,7 @@
 using UnityEngine;
-using Utilities.Data_structures;
+using XPBD_Engine.Scripts.Utilities.Data_structures;
 
-namespace Physics.Grabber.Interfaces
+namespace XPBD_Engine.Scripts.Physics.Grabber.Interfaces
 {
     public interface IGrabbable
     {

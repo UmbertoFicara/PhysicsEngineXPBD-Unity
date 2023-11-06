@@ -1,4 +1,4 @@
-namespace Utilities
+namespace XPBD_Engine.Scripts.Utilities
 {
     [System.Serializable]
     public class TetVisMesh

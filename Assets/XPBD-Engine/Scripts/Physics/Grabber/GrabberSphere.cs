@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using Grabber;
-using Physics.Grabber.Interfaces;
 using UnityEngine;
-using Utilities.Data_structures;
+using XPBD_Engine.Scripts.Physics.Grabber.Interfaces;
+using XPBD_Engine.Scripts.Utilities.Data_structures;
 
-namespace Physics.Grabber
+namespace XPBD_Engine.Scripts.Physics.Grabber
 {
     public class GrabberSphere : IGrabber
     {

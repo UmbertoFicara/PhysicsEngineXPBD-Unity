@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Physics.RigidBody
+namespace XPBD_Engine.Scripts.Physics.RigidBody
 {
     [RequireComponent(typeof(MeshFilter))]
     public class Ball : MonoBehaviour

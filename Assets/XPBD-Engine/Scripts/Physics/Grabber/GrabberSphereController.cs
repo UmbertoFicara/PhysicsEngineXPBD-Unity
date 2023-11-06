@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Grabber;
-using Physics.Grabber.Interfaces;
 using UnityEngine;
+using XPBD_Engine.Scripts.Physics.Grabber.Interfaces;
 
-namespace Physics.Grabber
+namespace XPBD_Engine.Scripts.Physics.Grabber
 {
     public class GrabberSphereController : MonoBehaviour
     {

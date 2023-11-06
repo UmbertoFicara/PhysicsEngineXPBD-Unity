@@ -1,7 +1,7 @@
 using UnityEngine;
 
 //Standardized Tetrahedron methods
-namespace Utilities
+namespace XPBD_Engine.Scripts.Utilities
 {
     public static class Tetrahedron
     {
