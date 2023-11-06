@@ -2,6 +2,7 @@ using System;
 using DefaultNamespace;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 using Utilities;
 
 namespace MullerTutorial
@@ -10,7 +11,7 @@ namespace MullerTutorial
 	public class SoftBodyTutorial : MonoBehaviour
 	{
 		public TextAsset modelJson;
-		public TetModel tetMesh;
+		[FormerlySerializedAs("tetMesh")] public TetVisMesh tetVisMesh;
 
 		private Mesh _mesh;
 	
@@ -41,16 +42,16 @@ namespace MullerTutorial
 		// Start is called before the first frame update
 		void Start()
 		{
-			tetMesh = JsonUtility.FromJson<TetModel>(modelJson.text);
+			tetVisMesh = JsonUtility.FromJson<TetVisMesh>(modelJson.text);
 		
-			_numParticles = tetMesh.verts.Length / 3;
-			_numTets = tetMesh.tetIds.Length / 4;
-			_pos = tetMesh.verts;
-			_prevPos = new float[tetMesh.verts.Length / 3];
+			_numParticles = tetVisMesh.verts.Length / 3;
+			_numTets = tetVisMesh.tetIds.Length / 4;
+			_pos = tetVisMesh.verts;
+			_prevPos = new float[tetVisMesh.verts.Length / 3];
 			_vel = new float[3 * _numParticles];
 
-			_tetIds = tetMesh.tetIds;
-			_edgeIds = tetMesh.tetEdgeIds;
+			_tetIds = tetVisMesh.tetIds;
+			_edgeIds = tetVisMesh.tetEdgeIds;
 			_restVol = new float[_numTets];
 			_edgeLengths = new float[_edgeIds.Length / 2];	
 			_invMass = new float[_numParticles];
@@ -69,10 +70,10 @@ namespace MullerTutorial
 		
 			_mesh.SetVertexBufferParams(_pos.Length/3, new VertexAttributeDescriptor(VertexAttribute.Position,VertexAttributeFormat.Float32,3));
 			_mesh.SetVertexBufferData<float>(_pos, 0, 0, _pos.Length);
-			_mesh.SetIndexBufferParams( tetMesh.tetSurfaceTriIds.Length, IndexFormat.UInt32);
-			_mesh.SetIndexBufferData<int>( tetMesh.tetSurfaceTriIds, 0, 0,  tetMesh.tetSurfaceTriIds.Length);
+			_mesh.SetIndexBufferParams( tetVisMesh.tetSurfaceTriIds.Length, IndexFormat.UInt32);
+			_mesh.SetIndexBufferData<int>( tetVisMesh.tetSurfaceTriIds, 0, 0,  tetVisMesh.tetSurfaceTriIds.Length);
  
-			_mesh.SetSubMesh(0, new SubMeshDescriptor(0, tetMesh.tetSurfaceTriIds.Length));
+			_mesh.SetSubMesh(0, new SubMeshDescriptor(0, tetVisMesh.tetSurfaceTriIds.Length));
 			_mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000);
 		
 			_mesh.RecalculateNormals();
@@ -135,10 +136,10 @@ namespace MullerTutorial
 		{
 			_mesh.SetVertexBufferParams(_pos.Length/3, new VertexAttributeDescriptor(VertexAttribute.Position,VertexAttributeFormat.Float32,3));
 			_mesh.SetVertexBufferData<float>(_pos, 0, 0, _pos.Length);
-			_mesh.SetIndexBufferParams( tetMesh.tetSurfaceTriIds.Length, IndexFormat.UInt32);
-			_mesh.SetIndexBufferData<int>( tetMesh.tetSurfaceTriIds, 0, 0,  tetMesh.tetSurfaceTriIds.Length);
+			_mesh.SetIndexBufferParams( tetVisMesh.tetSurfaceTriIds.Length, IndexFormat.UInt32);
+			_mesh.SetIndexBufferData<int>( tetVisMesh.tetSurfaceTriIds, 0, 0,  tetVisMesh.tetSurfaceTriIds.Length);
  
-			_mesh.SetSubMesh(0, new SubMeshDescriptor(0, tetMesh.tetSurfaceTriIds.Length));
+			_mesh.SetSubMesh(0, new SubMeshDescriptor(0, tetVisMesh.tetSurfaceTriIds.Length));
 			_mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000);
 		
 			_mesh.RecalculateNormals();

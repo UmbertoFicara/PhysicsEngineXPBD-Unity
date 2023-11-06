@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
+using DefaultNamespace;
 using Grabber;
 using Physics.Grabber.Interfaces;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Utilities;
 using Utilities.Data_structures;
 
@@ -10,12 +13,14 @@ namespace Physics.SoftBody
 	//Same as SoftBodySimulation but is using Vector3 instead of arrays where an index in the array is x, y, or z 
 	//This makes the code simpler to read buy maye a little slower according to the guy in the video, but I don't notice much difference...
 	[RequireComponent(typeof(MeshFilter))]
-	public class SoftBody : MonoBehaviour,IGrabbable
+	public class SoftBodyAdvanced : MonoBehaviour,IGrabbable
 	{
 		#region Variables
 		//Tetrahedralizer data structures
-		public TextAsset modelJson;
-		public TetModel tetMesh;
+		public TextAsset modelTetJson;
+		public TextAsset modelVisJson;
+		public TetMesh tetMesh;
+		public VisMesh visMesh;
 		//Min 0.25
 		public float meshScale = 1f;
 		[Range(0f,500f)]public float edgeCompliance= 100.0f;
@@ -25,6 +30,11 @@ namespace Physics.SoftBody
 		//------------------------------
 		//The Unity mesh to display the soft body mesh
 		private Mesh _mesh;
+
+		private Vector3[] _visVerts;
+		private int	_numVisVerts;
+		private float[] _skinningInfo;
+		
 		//Physics variables
 		private Vector3[] _pos; 
 		private Vector3[] _prevPos;
@@ -74,7 +84,8 @@ namespace Physics.SoftBody
 		#region MonoBehaviour
 		void Start()
 		{
-			tetMesh = JsonUtility.FromJson<TetModel>(modelJson.text);
+			tetMesh = JsonUtility.FromJson<TetMesh>(modelTetJson.text);
+			visMesh = JsonUtility.FromJson<VisMesh>(modelVisJson.text);
 			_numParticles = tetMesh.verts.Length / 3;
 			_numTets = tetMesh.tetIds.Length / 4;
 			
@@ -94,7 +105,7 @@ namespace Physics.SoftBody
 			_vel = new Vector3[_numParticles];
 
 			_tetIds = tetMesh.tetIds;
-			_edgeIds = tetMesh.tetEdgeIds;
+			_edgeIds = tetMesh.edgeIds;
 			_restVolumes = new float[_numTets];
 			_restEdgeLengths = new float[_edgeIds.Length / 2];	
 			_invMass = new float[_numParticles];
@@ -108,8 +119,7 @@ namespace Physics.SoftBody
 
 			InitPhysics();
 		
-			Translate(gameObject.transform.position);
-			gameObject.transform.position = Vector3.zero;
+
 
 			InitMesh();
 
@@ -120,9 +130,6 @@ namespace Physics.SoftBody
 				new[] { 0, 3, 1 },
 				new[] { 0, 1, 2 }
 			};
-		
-			//_grabId = -1; 
-			//_grabInvMass = 0.0f;
 			_grabbedVertices = new List<GrabbedVertex>();
 		}
 		private void OnDestroy()
@@ -138,17 +145,137 @@ namespace Physics.SoftBody
 		//Init the mesh when the simulation is started
 		private void InitMesh()
 		{
+			_numVisVerts =visMesh.verts.Length / 3;
+			_skinningInfo = new float[4*_numVisVerts];
+			var temp = new Vector3[_numVisVerts];
+			for (var i = 0; i < _numVisVerts; i++)
+			{
+				var a = i * 3;
+				var tempVect = new Vector3(visMesh.verts[a], visMesh.verts[a + 1], visMesh.verts[a + 2])*meshScale;
+				temp[i] = tempVect;
+			}
+			_visVerts = temp;
+			ComputeSkinningInfo(_visVerts);
+			
+			
 			_mesh = new Mesh();
 			GetComponent<MeshFilter>().mesh = _mesh;
 			_mesh.Clear();
-			_mesh.vertices = _pos;
-			_mesh.triangles = tetMesh.tetSurfaceTriIds;
+			_mesh.vertices = _visVerts;
+			_mesh.triangles = visMesh.triIds;
 			_mesh.RecalculateBounds();
 			_mesh.RecalculateNormals();
 		}
-		private void UpdateMeshes() 
+
+		private void ComputeSkinningInfo(Vector3[] visVerts)
 		{
-			_mesh.vertices = _pos;
+			// create a hash for all vertices of the visual mesh
+			var hash = new Hash(0.05f, _numVisVerts);
+			hash.Create(visVerts);
+
+			Array.Fill(_skinningInfo,-1); 		// undefined
+
+			var minDist = new float[_numVisVerts];
+			Array.Fill(minDist,float.MaxValue);
+			var border = 0.05f;
+			
+			// each tet searches for containing vertices
+
+			var tetCenter = new Vector3();
+			var mat = new Vector3[3];
+			var A = new float[9];
+			var bary = new float[4];
+			for (var i = 0; i < _numTets; i++) {
+				tetCenter = Vector3.zero;
+				// compute bounding sphere of tet DA CONTROLLARE
+				for (var j = 0; j < 4; j++)
+					tetCenter += _pos[_tetIds[4 * i + j]] * 0.25f;
+
+				var rMax = 0.0f;
+				for (var j = 0; j < 4; j++)
+				{
+					var r2 = Vector3.Distance(tetCenter, _pos[_tetIds[4 * i + j]]);
+					rMax = Math.Max(rMax, r2);
+				}
+
+				rMax += border;
+
+				hash.Query(tetCenter, rMax);
+				if (hash.GetQueryIds().Length == 0)
+					continue;
+
+				var id0 = _tetIds[4 * i];
+				var id1 = _tetIds[4 * i + 1];
+				var id2 = _tetIds[4 * i + 2];
+				var id3 = _tetIds[4 * i + 3];
+
+				mat[0] = _pos[id0] - _pos[id3];
+				mat[1] = _pos[id1] - _pos[id3];
+				mat[2] = _pos[id2] - _pos[id3];
+				
+				A = VectorHelper.MatInverse(VectorHelper.FromVecToFloat(mat));
+
+
+				for (var j = 0; j < hash.GetQueryIds().Length; j++) {
+					var id = hash.GetQueryIds()[j];
+
+					// we already have skinning info
+
+					if (minDist[id] <= 0.0)
+						continue;
+					
+					if (Vector3.SqrMagnitude(visVerts[id] - tetCenter) > rMax * rMax)
+						continue;
+
+					// compute barycentric coords for candidate
+
+					var t = visVerts[id] - _pos[id3];
+					t = VectorHelper.MatSetMult(mat, t);
+					bary[0] = t.x;bary[1] = t.y;bary[2] = t.z;
+					bary[3] = 1.0f - bary[0] - bary[1] - bary[2];
+
+					var dist = 0.0f;
+					for (var k = 0; k < 4; k++)
+						dist = Math.Max(dist, -bary[k]);
+								
+					if (dist < minDist[id]) {
+						minDist[id] = dist;
+						_skinningInfo[4 * id] = i;
+						_skinningInfo[4 * id + 1] = bary[0];
+						_skinningInfo[4 * id + 2] = bary[1];
+						_skinningInfo[4 * id + 3] = bary[2];
+					}
+				}
+			}
+
+			
+		}
+		
+		public void UpdateMeshes() 
+		{
+			var positions = _visVerts;
+			var nr = 0;
+			for (var i = 0; i < _numVisVerts; i++) {
+				var tetNr = _skinningInfo[nr++] * 4;
+				if (tetNr < 0) {
+					nr += 3;
+					continue;
+				}
+				var b0 = _skinningInfo[nr++];
+				var b1 = _skinningInfo[nr++];
+				var b2 = _skinningInfo[nr++];
+				var b3 = 1.0f - b0 - b1 - b2;
+				var id0 = _tetIds[(int)tetNr++];
+				var id1 = _tetIds[(int)tetNr++];
+				var id2 = _tetIds[(int)tetNr++];
+				var id3 = _tetIds[(int)tetNr++];
+				positions[i] = b0*_pos[id0] + b1*_pos[id1] + b2*_pos[id2] + b3*_pos[id3];
+
+			}
+
+			_visVerts = positions;
+			
+			_mesh.vertices = _visVerts;
 			_mesh.RecalculateBounds();
 			_mesh.RecalculateNormals();
 		}
@@ -287,7 +414,7 @@ namespace Physics.SoftBody
 					continue;
 				_vel[i] = (_pos[i] - _prevPos[i]) * oneOverDt;
 			}
-			UpdateMeshes();
+			//UpdateMeshes();
 		}
 		//Solve distance constraint
 		//2 particles:
@@ -475,7 +602,8 @@ namespace Physics.SoftBody
 			//Mesh data
 			Vector3[] vertices = _pos;
 
-			int[] triangles = tetMesh.tetSurfaceTriIds;
+			//DA CORREGGERE
+			int[] triangles = visMesh.triIds;
 
 			//Find if the ray hit a triangle in the mesh
 			Intersections.IsRayHittingMesh(ray, vertices,_invMass, triangles, out hit);

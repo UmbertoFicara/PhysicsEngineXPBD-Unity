@@ -1,7 +1,7 @@
 namespace Utilities
 {
     [System.Serializable]
-    public class TetModel
+    public class TetVisMesh
     {
         public string name;
         public float[] verts;
