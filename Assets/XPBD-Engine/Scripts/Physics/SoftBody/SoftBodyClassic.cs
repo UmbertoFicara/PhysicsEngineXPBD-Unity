@@ -198,7 +198,7 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 		}
 		
 		//Move the particles and handle environment collision
-		public void PreSolve(float dt, Vector3 gravity,Vector3 worldSize,Vector3 worldCenter )
+		public void PreSolve(float dt, Vector3 gravity,Vector3 worldBoxMax,Vector3 worldBoxMin )
 		{
 			//For each particle
 			for (var i = 0; i < _numParticles; i++) {
@@ -211,54 +211,53 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 				_prevPos[i] = _pos[i];
 				//Update pos
 				_pos[i] += _vel[i] * dt;
-				EnvironmentCollision(i,worldSize,worldCenter);
+				EnvironmentCollision(i,worldBoxMax,worldBoxMin);
 			}
 		}
 		//Collision with invisible walls and floor
-		private void EnvironmentCollision(int i,Vector3 worldSize,Vector3 worldCenter)
+		private void EnvironmentCollision(int i,Vector3 worldBoxMax,Vector3 worldBoxMin)
 		{
 			//Floor collision
-			float x = _pos[i].x;
-			float y = _pos[i].y;
-			float z = _pos[i].z;
-			var sumVect = worldSize + worldCenter;
+			var x = _pos[i].x;
+			var y = _pos[i].y;
+			var z = _pos[i].z;
 
 			//X
-			if (x < worldCenter.x)
+			if (x < worldBoxMin.x)
 			{
 				_pos[i] = _prevPos[i];
-				_pos[i].x = worldCenter.x;
+				_pos[i].x = worldBoxMin.x;
 			}
-			else if (x > sumVect.x)
+			else if (x > worldBoxMax.x)
 			{
 				_pos[i] = _prevPos[i];
-				_pos[i].x = sumVect.x;
+				_pos[i].x = worldBoxMax.x;
 			}
 
 			//Y
-			if (y < worldCenter.y)
+			if (y < worldBoxMin.y)
 			{
 				//Set the pos to previous pos
 				_pos[i] = _prevPos[i];
 				//But the y of the previous pos should be at the ground
-				_pos[i].y = worldCenter.y;
+				_pos[i].y = worldBoxMin.y;
 			}
-			else if (y > sumVect.y)
+			else if (y > worldBoxMax.y)
 			{
 				_pos[i] = _prevPos[i];
-				_pos[i].y = sumVect.y;
+				_pos[i].y = worldBoxMax.y;
 			}
 
 			//Z
-			if (z < worldCenter.z)
+			if (z < worldBoxMin.z)
 			{
 				_pos[i] = _prevPos[i];
-				_pos[i].z = worldCenter.z;
+				_pos[i].z = worldBoxMin.z;
 			}
-			else if (z > sumVect.z)
+			else if (z > worldBoxMax.z)
 			{
 				_pos[i] = _prevPos[i];
-				_pos[i].z = sumVect.z;
+				_pos[i].z = worldBoxMax.z;
 			}
 		}
 		//Handle the soft body physics

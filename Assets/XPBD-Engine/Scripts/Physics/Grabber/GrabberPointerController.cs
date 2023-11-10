@@ -8,13 +8,21 @@ namespace XPBD_Engine.Scripts.Physics.Grabber
     public class GrabberPointerController : MonoBehaviour
     {
         public Texture2D cursorTexture;
-        public PhysicalWorld physicalWorld;
+        private PhysicalWorld _physicalWorld;
         private GrabberPointer _grabber;
 
         // Start is called before the first frame update
         void Start()
         {
             _grabber = new GrabberPointer(Camera.main);
+            if (FindObjectsOfType<PhysicalWorld>().Length>0)
+            {
+                _physicalWorld = FindObjectsOfType<PhysicalWorld>()[0];
+            }
+            else
+            {
+                Debug.LogError("You must include at least one Physical World component in the scene");
+            }
             Cursor.visible = true;
             Cursor.SetCursor(cursorTexture, Vector2.zero, CursorMode.ForceSoftware);
         }
@@ -28,7 +36,7 @@ namespace XPBD_Engine.Scripts.Physics.Grabber
         {
             if (Input.GetMouseButtonDown(0))
             {
-                var temp = new List<IGrabbable>(physicalWorld.GetSoftBodies().ToList());
+                var temp = new List<IGrabbable>(_physicalWorld.GetSoftBodies().ToList());
         
                 _grabber.StartGrab(temp);
             }

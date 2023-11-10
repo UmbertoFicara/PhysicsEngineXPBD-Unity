@@ -8,22 +8,27 @@ namespace XPBD_Engine.Scripts.Physics
     public class PhysicalWorld : MonoBehaviour
     {
         public Vector3 gravity;
-        public Vector3 worldSize;
-        public Vector3 worldCenter;
+        public BoxCollider worldCollider;
+        private Vector3 _worldBoxMin;
+        private Vector3 _worldBoxMax;
         public int numSubsteps = 10;
         public bool paused;
 
-        private global::XPBD_Engine.Scripts.Physics.SoftBody.SoftBodyClassic[] _classicSoftBodies;
-        private global::XPBD_Engine.Scripts.Physics.SoftBody.SoftBodyAdvanced[] _advancedSoftBodies;
+        private SoftBodyClassic[] _classicSoftBodies;
+        private SoftBodyAdvanced[] _advancedSoftBodies;
         private Ball[] _balls;
 
         private bool _isPressedJump;
         private bool _isPressedSqueeze;
         private void Start()
         {
-            _classicSoftBodies = FindObjectsOfType<global::XPBD_Engine.Scripts.Physics.SoftBody.SoftBodyClassic>();
-            _advancedSoftBodies = FindObjectsOfType<global::XPBD_Engine.Scripts.Physics.SoftBody.SoftBodyAdvanced>();
+            _classicSoftBodies = FindObjectsOfType<SoftBodyClassic>();
+            _advancedSoftBodies = FindObjectsOfType<SoftBodyAdvanced>();
             _balls = FindObjectsOfType<Ball>();
+            var worldSize = worldCollider.size;
+            var worldCenter =worldCollider.center;
+            _worldBoxMin = worldCenter - worldSize / 2.0f;
+            _worldBoxMax = worldCenter + worldSize / 2.0f;
         }
         private void Update()
         {
@@ -54,7 +59,7 @@ namespace XPBD_Engine.Scripts.Physics
                 return;
             for (var step = 0; step < numSubsteps; step++) {
                 for (var i = 0; i < _classicSoftBodies.Length; i++) 
-                    _classicSoftBodies[i].PreSolve(sdt, gravity,worldSize,worldCenter);
+                    _classicSoftBodies[i].PreSolve(sdt, gravity,_worldBoxMax,_worldBoxMin);
 					
                 for (var i = 0; i < _classicSoftBodies.Length; i++) 
                     _classicSoftBodies[i].Solve(sdt);
@@ -69,7 +74,7 @@ namespace XPBD_Engine.Scripts.Physics
                 return;
             for (var step = 0; step < numSubsteps; step++) {
                 for (var i = 0; i < _advancedSoftBodies.Length; i++) 
-                    _advancedSoftBodies[i].PreSolve(sdt, gravity,worldSize,worldCenter);
+                    _advancedSoftBodies[i].PreSolve(sdt, gravity,_worldBoxMax,_worldBoxMin);
 					
                 for (var i = 0; i < _advancedSoftBodies.Length; i++) 
                     _advancedSoftBodies[i].Solve(sdt);
@@ -85,7 +90,7 @@ namespace XPBD_Engine.Scripts.Physics
             if (_balls.Length ==0)
                 return;
             for (var i = 0; i < _balls.Length; i++)
-                _balls[i].Simulate(gravity,Time.fixedDeltaTime,worldSize);
+                _balls[i].Simulate(gravity,Time.fixedDeltaTime,_worldBoxMax);
         }
         public IEnumerable<SoftBodyClassic> GetSoftBodies()
         {

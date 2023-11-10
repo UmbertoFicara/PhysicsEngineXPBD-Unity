@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 505036721787059638}
   - component: {fileID: 5804281629991715518}
   m_Layer: 0
-  m_Name: GrabbingPointL
+  m_Name: GrabbingPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
