@@ -170,10 +170,10 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 			var hash = new Hash(0.05f, _numVisVerts);
 			hash.Create(visVerts);
 
-			Array.Fill(_skinningInfo,-1); 		// undefined
+			//Array.Fill(_skinningInfo,-1); 		// undefined
 
 			var minDist = new float[_numVisVerts];
-			Array.Fill(minDist,float.MaxValue);
+			//Array.Fill(minDist,float.MaxValue);
 			var border = 0.05f;
 			
 			// each tet searches for containing vertices

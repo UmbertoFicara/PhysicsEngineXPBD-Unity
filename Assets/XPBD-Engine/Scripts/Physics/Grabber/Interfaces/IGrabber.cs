@@ -5,11 +5,11 @@ namespace XPBD_Engine.Scripts.Physics.Grabber.Interfaces
 {
     public interface IGrabber
     {
-        public void StartGrab(List<IGrabbable> bodies);
+         void StartGrab(List<IGrabbable> bodies);
 
-        public void MoveGrab(Vector3 position);
+         void MoveGrab(Vector3 position);
 
-        public void EndGrab(Vector3 position);
+         void EndGrab(Vector3 position);
 
     }
 }
