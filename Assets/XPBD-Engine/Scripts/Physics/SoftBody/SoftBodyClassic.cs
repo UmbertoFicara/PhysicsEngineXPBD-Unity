@@ -151,14 +151,36 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 			_mesh = new Mesh();
 			GetComponent<MeshFilter>().mesh = _mesh;
 			_mesh.Clear();
-			_mesh.vertices = _pos;
-			_mesh.triangles = tetVisMesh.tetSurfaceTriIds;
+
+			var vertices = new Vector3[tetVisMesh.vertexUvList.Length/2];
+			var uvs = new Vector2[tetVisMesh.vertexUvList.Length/2];
+			var triangles = tetVisMesh.tetSurfaceVertexUvIds;
+
+			var meshUvs = new Vector2[tetVisMesh.uvs.Length / 2];
+			for (int i = 0; i < tetVisMesh.uvs.Length/2; i++)
+			{
+				meshUvs[i] = new Vector2(tetVisMesh.uvs[2 * i], tetVisMesh.uvs[2 * i + 1]);
+			}
+			for (int i = 0; i < tetVisMesh.vertexUvList.Length/2; i++)
+			{
+				vertices[i] = _pos[tetVisMesh.vertexUvList[2 * i + 0]];
+				uvs[i] = meshUvs[tetVisMesh.vertexUvList[2 * i + 1]];
+			}
+			_mesh.vertices = vertices;
+			_mesh.uv = uvs;
+			_mesh.triangles = triangles;
+			
 			_mesh.RecalculateBounds();
 			_mesh.RecalculateNormals();
 		}
 		private void UpdateMeshes() 
 		{
-			_mesh.vertices = _pos;
+			var vertices = new Vector3[tetVisMesh.vertexUvList.Length/2];
+			for (int i = 0; i < tetVisMesh.vertexUvList.Length/2; i++)
+			{
+				vertices[i] = _pos[tetVisMesh.vertexUvList[2 * i + 0]];
+			}
+			_mesh.vertices = vertices;
 			_mesh.RecalculateBounds();
 			_mesh.RecalculateNormals();
 		}

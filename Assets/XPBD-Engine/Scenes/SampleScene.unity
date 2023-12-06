@@ -544,6 +544,10 @@ PrefabInstance:
       propertyPath: m_Center.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2872764625938990747, guid: 48d345e19b74a19449e0793ff75f838b, type: 3}
+      propertyPath: numSubsteps
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 4721392478864895634, guid: 48d345e19b74a19449e0793ff75f838b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -668,12 +672,12 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2530494586524191216, guid: fac81c21e34a88a4196eb0b458fefbd1, type: 3}
       propertyPath: meshScale
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2530494586524191216, guid: fac81c21e34a88a4196eb0b458fefbd1, type: 3}
       propertyPath: modelJson
       value: 
-      objectReference: {fileID: 4900000, guid: cb3336b5b8751464bb5e79e5044a86cb, type: 3}
+      objectReference: {fileID: 4900000, guid: 0c0a5b1d60bdd284e8ad6db46bb4a441, type: 3}
     - target: {fileID: 2530494586524191216, guid: fac81c21e34a88a4196eb0b458fefbd1, type: 3}
       propertyPath: isBaseStatic
       value: 0
@@ -774,6 +778,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7224793812800432642, guid: fac81c21e34a88a4196eb0b458fefbd1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 52833415372c69e4faaaa437d63709e8, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
