@@ -19,9 +19,12 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 		public TetVisMesh tetVisMesh;
 		//Min 0.25
 		public float meshScale = 1f;
+		public Vector3 meshRotation;
 		[Range(0f,500f)]public float edgeCompliance= 100.0f;
 		[Range(0f,500f)]public float volCompliance = 0.0f;
 		public List<StaticSide> staticSides;
+
+		public List<SphericalAnchor> sphericalAnchors;
 		//------------------------------
 		private Vector3 _initPosition;
 		//The Unity mesh to display the soft body mesh
@@ -138,18 +141,18 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 			var pos = GetPosFromTetMesh(tetVisMesh.verts);
 			// Draw a yellow sphere at the transform's position
 			Gizmos.DrawMesh(GetMesh(tetVisMesh,pos),transform.position);
-
-
 		}
 
 		private Vector3[] GetPosFromTetMesh(float[] vertices)
 		{
 			var numParticles = vertices.Length / 3;
 			var pos = new Vector3[numParticles];
+			Quaternion rotation = Quaternion.Euler(meshRotation);
 			for (var i = 0; i < numParticles; i++)
 			{
 				var a = i * 3;
 				var tempVect = new Vector3(vertices[a], vertices[a + 1], vertices[a + 2])*meshScale;
+				tempVect = rotation *tempVect;
 				pos[i] = tempVect;
 			}
 			return pos; 
@@ -228,6 +231,18 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 			if (staticSides.Count>0)
 			{
 				SetStatic();
+			}
+
+			foreach (var anchor in sphericalAnchors)
+			{
+				for (var index = 0; index < _pos.Length; index++)
+				{
+					var vertex = _pos[index];
+					if (Vector3.Distance(anchor.transform.position, vertex+transform.position) <= anchor.radius)
+					{
+						SetVertexStatic(index);
+					}
+				}
 			}
 		}
 
@@ -317,7 +332,7 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 		}
 		
 		//Move the particles and handle environment collision
-		public void PreSolve(float dt, Vector3 gravity, WorldBoundType boundType,Vector3 worldBoundCenter,Vector3 worldBoundSize,float worldSphereRadius)
+		public void PreSolve(float dt, Vector3 gravity, WorldBoundType boundType,Vector3 worldBoundCenter,Vector3 worldBoundSize,float worldSphereRadius,Vector3 worldCapsulePos1,Vector3 worldCapsulePos2)
 		{
 			//For each particle
 			for (var i = 0; i < _numParticles; i++) {
@@ -330,11 +345,11 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 				_prevPos[i] = _pos[i];
 				//Update pos
 				_pos[i] += _vel[i] * dt;
-				EnvironmentCollision(boundType,i,worldBoundSize,worldBoundCenter,worldSphereRadius);
+				EnvironmentCollision(boundType,i,worldBoundSize,worldBoundCenter,worldSphereRadius,worldCapsulePos1,worldCapsulePos2);
 			}
 		}
 		//Collision with invisible walls and floor
-		private void EnvironmentCollision(WorldBoundType boundType,int i,Vector3 worldBoundSize,Vector3 worldBoundCenter,float worldSphereRadius)
+		private void EnvironmentCollision(WorldBoundType boundType,int i,Vector3 worldBoundSize,Vector3 worldBoundCenter,float worldSphereRadius,Vector3 worldCapsulePos1,Vector3 worldCapsulePos2)
 		{
 			switch(boundType) {
 				case WorldBoundType.None:
@@ -347,12 +362,27 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 				case WorldBoundType.Sphere:
 					HandleSphereWorldCollision(i, worldBoundCenter, worldSphereRadius);
 					break;
+				case WorldBoundType.Capsule:
+					HandleCapsuleWorldCollision(i, worldCapsulePos1,worldCapsulePos2, worldSphereRadius);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(boundType), boundType, null);
 			}
 
 		}
+		private void HandleCapsuleWorldCollision(int i,Vector3 capsulePos1,Vector3 capsulePos2,float capsuleRadius)
+		{
+			var closestPoint = Intersections.GetClosestPointOnSegment(_pos[i], capsulePos1, capsulePos2);
+			var distance = Vector3.Distance(_pos[i], closestPoint);
+			if (distance>capsuleRadius)
+			{
+				_pos[i] = _prevPos[i];
+				var dir = _pos[i] - closestPoint;
+				dir.Normalize();
 
+				_pos[i] = closestPoint + dir * capsuleRadius;
+			}
+		}
 		private void HandleBoxWorldCollision(int i,Vector3 worldBoxMax,Vector3 worldBoxMin)
 		{
 			//Floor collision
