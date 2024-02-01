@@ -85,7 +85,10 @@ namespace XPBD_Engine.Scripts.Managers
         //Public method to start the activity
         public void StartActivity()
         {
-            InitActivity();
+            if (!_isActivityRunning)
+            {
+                InitActivity();
+            }
         }
         
         //Handle the error messages
