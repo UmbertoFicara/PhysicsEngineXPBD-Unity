@@ -689,6 +689,14 @@ namespace XPBD_Engine.Scripts.Physics.SoftBody
 		}
 		#endregion
 
+		public Vector3 GetVertexPos(int index)
+		{
+			return _pos[index];
+		}
+		public Vector3 GetVertexNorm(int index)
+		{
+			return _mesh.normals[index];
+		}
 	}
 }
 
