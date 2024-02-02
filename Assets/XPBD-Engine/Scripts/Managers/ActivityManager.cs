@@ -29,9 +29,7 @@ namespace XPBD_Engine.Scripts.Managers
         }
         private void OnDisable()
         {
-            _isActivityRunning = false;
-            Destroy(_selectionSphere);
-            _currentSelectedVertexIndex = 0;
+            HandleEndActivity();
             instance = null;
         }
         private void Update()
@@ -40,25 +38,37 @@ namespace XPBD_Engine.Scripts.Managers
             {
                 //Update the selection sphere
                 _selectionSphere.transform.position = softbodyActivity.GetVertexPos(activitySettings.vertexIndices[_currentSelectedVertexIndex]);
+                //Stop the activity for debugging purposes
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    StopActivity();
+                }
             }
             else
             {
                 //Start the activity for debugging purposes
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    InitActivity();
+                    StartActivity();
                 }
             }
         }
 
         //Handle the initialization of the activity
-        private void InitActivity()
+        private void HandleInitActivity()
         {
             _selectionSphere = Instantiate(selectionSpherePrefab, softbodyActivity.GetVertexPos(activitySettings.vertexIndices[_currentSelectedVertexIndex]), Quaternion.identity);
             _selectionSphere.transform.localScale = Vector3.one * (activitySettings.grabbingDistance * 2f);
-            _isActivityRunning = true;
+            _isActivityRunning = true; 
+            _currentSelectedVertexIndex = 0;
         }
-        
+        //Handle the end of the activity
+        private void HandleEndActivity()
+        {
+            _isActivityRunning = false;
+            Destroy(_selectionSphere);
+            _currentSelectedVertexIndex = 0;
+        }
         //Handle the change of the grabbed vertex
         private void ChangeGrabbedVertex()
         {
@@ -72,6 +82,7 @@ namespace XPBD_Engine.Scripts.Managers
             }
         }
         
+        
         //Called from the grabber to check if the vertex is close enough to be grabbed
         public void StartGrabbingVertex(int index)
         {
@@ -84,13 +95,20 @@ namespace XPBD_Engine.Scripts.Managers
                 } 
             }
         }
-        
         //Public method to start the activity
         public void StartActivity()
         {
             if (!_isActivityRunning)
             {
-                InitActivity();
+                HandleInitActivity();
+            }
+        }
+        //Public method to stop the activity
+        public void StopActivity()
+        {
+            if (_isActivityRunning)
+            {
+                HandleEndActivity();
             }
         }
         
