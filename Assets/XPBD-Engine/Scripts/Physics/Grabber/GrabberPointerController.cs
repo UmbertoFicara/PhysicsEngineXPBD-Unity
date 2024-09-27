@@ -27,12 +27,12 @@ namespace XPBD_Engine.Scripts.Physics.Grabber
         {
             if (Input.GetMouseButtonDown(0))
             {
-                if (PhysicalWorld.instance == null)
+                if (PhysicsEngine.instance == null)
                 {
                     Debug.LogError("There is no PhysicalWorld instance in the scene.");
                     return;
                 }
-                var temp = new List<IGrabbable>(PhysicalWorld.instance.GetSoftBodies().ToList());
+                var temp = new List<IGrabbable>(PhysicsEngine.instance.GetSoftBodies().ToList());
         
                 _grabber.StartGrab(temp);
             }

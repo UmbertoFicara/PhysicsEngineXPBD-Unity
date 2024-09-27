@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using XPBD_Engine.Scripts.Physics.Grabber.Interfaces;
+using XPBD_Engine.Scripts.Physics.Structure;
 using XPBD_Engine.Scripts.Utilities;
 using XPBD_Engine.Scripts.Utilities.Data_structures;
 

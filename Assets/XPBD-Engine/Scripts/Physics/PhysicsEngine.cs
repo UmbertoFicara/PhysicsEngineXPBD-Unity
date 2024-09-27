@@ -10,9 +10,9 @@ using XPBD_Engine.Scripts.Utilities;
 
 namespace XPBD_Engine.Scripts.Physics
 {
-    public class PhysicalWorld : MonoBehaviour
+    public class PhysicsEngine : MonoBehaviour
     {
-        public static PhysicalWorld instance;
+        public static PhysicsEngine instance;
 
         public Vector3 gravity;                         //The gravity of the world
         public WorldBoundType worldBoundType;           //The type of the world bound
@@ -25,6 +25,7 @@ namespace XPBD_Engine.Scripts.Physics
         public bool paused;                             //If the simulation is paused
         
         private SoftBodyClassic[] _classicSoftBodies;
+        private SoftBody.SoftBody[] _softBodies;
         //private SoftBodyAdvanced[] _advancedSoftBodies;
         //private Ball[] _balls;
         
@@ -32,6 +33,7 @@ namespace XPBD_Engine.Scripts.Physics
         {
             instance = this;
             _classicSoftBodies = FindObjectsOfType<SoftBodyClassic>();
+            _softBodies = FindObjectsOfType<SoftBody.SoftBody>();
         }
         private void OnDisable()
         {
@@ -88,6 +90,7 @@ namespace XPBD_Engine.Scripts.Physics
             
             var sdt = Time.fixedDeltaTime / numSubsteps;
             HandleSimulationSoftBodyClassic(sdt);
+            HandleSimulateSoftBody(sdt);
             //HandleSimulationSoftBodyAdvanced(sdt);
             //HandleSimulationBalls();
         }
@@ -105,6 +108,23 @@ namespace XPBD_Engine.Scripts.Physics
                 for (var i = 0; i < _classicSoftBodies.Length; i++) 
                     _classicSoftBodies[i].PostSolve(sdt);
             }
+        }
+
+        private void HandleSimulateSoftBody( float sdt)
+        {
+            if (_softBodies.Length ==0)
+                return;
+            for (var step = 0; step < numSubsteps; step++) {
+                for (var i = 0; i < _softBodies.Length; i++) 
+                    _softBodies[i].PreSolve(sdt, gravity,worldBoundCenter,worldBoundSize);
+                    
+                for (var i = 0; i < _softBodies.Length; i++) 
+                    _softBodies[i].Solve(sdt);
+
+                for (var i = 0; i < _softBodies.Length; i++) 
+                    _softBodies[i].PostSolve(sdt);
+            }
+            
         }
         /*
          

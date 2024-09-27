@@ -4,8 +4,8 @@ using UnityEngine;
 using XPBD_Engine.Scripts.Physics;
 
 
-[CustomEditor(typeof(PhysicalWorld))]
-public class PhysicalWorldEditor : Editor
+[CustomEditor(typeof(PhysicsEngine))]
+public class PhysicsEngineEditor : Editor
 {
     private SerializedProperty _gravity;
     private SerializedProperty _worldBoundCenter;
@@ -34,7 +34,7 @@ public class PhysicalWorldEditor : Editor
     {
         serializedObject.Update();
         
-        var physicalWorld = (PhysicalWorld)target;
+        var physicalWorld = (PhysicsEngine)target;
         EditorGUILayout.PropertyField(_gravity);
         EditorGUILayout.PropertyField(_numSubsteps);
         EditorGUILayout.PropertyField(_paused);

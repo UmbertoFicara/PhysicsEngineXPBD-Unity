@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using XPBD_Engine.Scripts.Physics.Grabber.Interfaces;
+using XPBD_Engine.Scripts.Physics.Structure;
 using XPBD_Engine.Scripts.Utilities;
 using XPBD_Engine.Scripts.Utilities.Data_structures;
 
