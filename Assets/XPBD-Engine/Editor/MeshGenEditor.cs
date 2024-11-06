@@ -12,6 +12,7 @@ public class MeshGenEditor : Editor
     private SerializedProperty _height;
     private SerializedProperty _depth;
     private SerializedProperty _gizmoSphereRadius;
+    private SerializedProperty _meshTopology;
 
     private void OnEnable()
     {
@@ -20,6 +21,7 @@ public class MeshGenEditor : Editor
         _height = serializedObject.FindProperty("height");
         _depth = serializedObject.FindProperty("depth");
         _gizmoSphereRadius = serializedObject.FindProperty("gizmoSphereRadius");
+        _meshTopology = serializedObject.FindProperty("meshTopology");
     }
 
     public override void OnInspectorGUI()
@@ -28,6 +30,7 @@ public class MeshGenEditor : Editor
         MeshGen meshGen = (MeshGen)target;
         
         EditorGUILayout.PropertyField(_vertexResolution);
+        EditorGUILayout.PropertyField(_meshTopology);
         EditorGUILayout.PropertyField(_width);
         EditorGUILayout.PropertyField(_height);
         EditorGUILayout.PropertyField(_depth);

@@ -1,17 +1,23 @@
+using System;
+using System.Threading;
+using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 using XPBD_Engine.Scripts.Utilities;
 
-[ExecuteInEditMode]
+//[ExecuteInEditMode]
+[RequireComponent(typeof(MeshFilter))]
 public class MeshGen : MonoBehaviour
 {
-    public int vertexResolution = 10;
+    public int vertexResolution = 2;
     public float width;
     public float height;
     public float depth;
     public float gizmoSphereRadius;
-
     private TetMesh _tetMesh;
     private Mesh _mesh;
+    public MeshTopology meshTopology; 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,7 +42,10 @@ public class MeshGen : MonoBehaviour
         {
             vertices = ConvertToVector3List(_tetMesh.verts)
         };
-        _mesh.SetIndices(DrawIndices(totalVertices, 0), MeshTopology.Points, 0);
+
+        _mesh.SetIndices(DrawIndices(totalVertices), meshTopology, 0);
+
+        GetComponent<MeshFilter>().mesh = _mesh;
     }
 
     private float[] DrawVertices(int totalVertices)
@@ -66,13 +75,13 @@ public class MeshGen : MonoBehaviour
         return vertices;
     }
 
-    private int[] DrawIndices(int totalVertices, int meshTopology)
+    private int[] DrawIndices(int totalVertices)
     {
         int[] indices;
         switch (meshTopology)
         {
             //Point Mesh
-            case 0:
+            case MeshTopology.Points:
             {
                 indices = new int[totalVertices];
 
@@ -83,10 +92,45 @@ public class MeshGen : MonoBehaviour
                 
                 break;
             }
+            /* case MeshTopology.Triangles:
+            {
+                var cubes = MathF.Pow(vertexResolution - 1, 3);
+                var lastIndex = 0;
+                for(int i = 0; i < cubes; i++)
+                {
+                    //assuming vertices are arranged in cubes
+                    var i000 = lastIndex;
+                    var i001 = lastIndex + 1;
+                    var i010 = lastIndex + 2;
+                    var i011 = lastIndex + 3;
+                    var i100 = lastIndex + 4;
+                    var i101 = lastIndex + 5;
+                    var i110 = lastIndex + 6;
+                    var i111 = lastIndex + 7;
+
+                    DrawTetMesh(i100, i101, i111, i011);
+                    DrawTetMesh(i101, i110, i111, i011);
+                    DrawTetMesh(i101, i001, i011, i010);
+                    DrawTetMesh(i101, i010, i111, i010);
+                    DrawTetMesh(i011, i010, i110, i111);
+                }
+
+                
+
+                
+                
+                break;
+            } */
+
             default: return null;
         }
 
         return indices;
+    }
+
+    private void DrawTetMesh()
+    {
+
     }
 
     private void OnDrawGizmos()
