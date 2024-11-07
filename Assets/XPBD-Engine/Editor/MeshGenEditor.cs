@@ -8,6 +8,7 @@ using UnityEngine;
 public class MeshGenEditor : Editor
 {
     private SerializedProperty _useGameObjectTransforms;
+    private SerializedProperty _verticesTransformContainer;
     private SerializedProperty _vertexResolution;
     private SerializedProperty _width;
     private SerializedProperty _height;
@@ -19,6 +20,7 @@ public class MeshGenEditor : Editor
     private void OnEnable()
     {
         _useGameObjectTransforms = serializedObject.FindProperty("useGameObjectTransforms");
+        _verticesTransformContainer = serializedObject.FindProperty("verticesTransformContainer");
         _vertexResolution = serializedObject.FindProperty("vertexResolution");
         _width = serializedObject.FindProperty("width");
         _height = serializedObject.FindProperty("height");
@@ -37,6 +39,7 @@ public class MeshGenEditor : Editor
         if (_useGameObjectTransforms.boolValue)
         {
             EditorGUILayout.HelpBox("Vertices will be derived from GameObject transforms.", MessageType.Info);
+            EditorGUILayout.PropertyField(_verticesTransformContainer, new GUIContent("Vertices Container"));
         }
         else
         {

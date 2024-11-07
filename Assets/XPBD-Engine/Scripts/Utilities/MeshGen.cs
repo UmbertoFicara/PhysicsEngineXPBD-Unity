@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEditor;
 using UnityEditorInternal;
@@ -11,6 +12,7 @@ public class MeshGen : MonoBehaviour
 {
     public bool displayEdges = true;  // Toggle for edge display
     public bool useGameObjectTransforms;
+    public GameObject verticesTransformContainer;
     public int vertexResolution = 2;
     public float width;
     public float height;
@@ -33,25 +35,81 @@ public class MeshGen : MonoBehaviour
 
     public void InitMesh()
     {
-        int totalVertices = vertexResolution * vertexResolution * vertexResolution;
+        if(!useGameObjectTransforms)
+        {
+            int totalVertices = vertexResolution * vertexResolution * vertexResolution;
         
-        _tetMesh = new TetMesh
-        {
-            verts = DrawVertices(totalVertices)
-            //verts = DrawTetrahedron();
-        };
+            _tetMesh = new TetMesh
+            {
+                verts = GenerateProceduralVertices(totalVertices)
+            };
 
-        _mesh = new Mesh
-        {
-            vertices = ConvertToVector3List(_tetMesh.verts)
-        };
+            _mesh = new Mesh
+            {
+                vertices = ConvertToVector3List(_tetMesh.verts)
+            };
 
-        _mesh.SetIndices(DrawIndices(), MeshTopology.Triangles, 0);
+            _mesh.SetIndices(GenerateProceduralIndices(), MeshTopology.Triangles, 0);
+        }
+        else
+        {
+             _tetMesh = new TetMesh
+            {
+                verts = GenerateTetVerticesFromTransforms()
+            };
+
+            _mesh = new Mesh
+            {
+                vertices = ConvertToVector3List(_tetMesh.verts)
+            };
+
+            _mesh.SetIndices(GenerateTetIndices(), MeshTopology.Triangles, 0);
+        }
+        
 
         GetComponent<MeshFilter>().mesh = _mesh;
     }
 
-    private float[] DrawVertices(int totalVertices)
+    private float[] GenerateTetVerticesFromTransforms()
+    {
+        Transform containerTransform = verticesTransformContainer.transform;
+        // Example: Collect positions from child GameObjects
+        float[] vertices = new float[3 * containerTransform.childCount];
+        float vScale = 2.5f;
+        int verticesIndex = 0;
+        for (int i = 0; i < containerTransform.childCount; i++)
+        {
+            vertices[verticesIndex++] = containerTransform.GetChild(i).position.x * vScale;
+            vertices[verticesIndex++] = containerTransform.GetChild(i).position.y * vScale;
+            vertices[verticesIndex++] = containerTransform.GetChild(i).position.z * vScale;
+        }
+
+        return vertices;
+        // Use vertices array to build your mesh...
+    }
+
+    private int[] GenerateTetIndices()
+    {
+        // Indices for the faces of the tetrahedron
+        int[] indices = new int[12]
+        {
+            // Face 1: 
+            0, 1, 2,
+
+            // Face 2: 
+            2, 1, 3,
+
+            // Face 3: 
+            3, 1, 0,
+
+            // Face 4: 
+            0, 2, 3
+        };
+
+        return indices;
+    }
+
+    private float[] GenerateProceduralVertices(int totalVertices)
     {
         
         float[] vertices = new float[3 * totalVertices];
@@ -85,7 +143,7 @@ public class MeshGen : MonoBehaviour
         return vertices;
     }
 
-    private int[] DrawIndices()
+    private int[] GenerateProceduralIndices()
     {
         int quadsPerDimension = vertexResolution - 1; // Number of quads per dimension
         int trianglesPerQuad = 2; // Two triangles per quad
